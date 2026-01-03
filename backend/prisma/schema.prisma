@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-py"
+  enable_experimental_decimal = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique
+  passwordHash    String
+
+  profile         Profile?
+  transactions    Transaction[]
+  riskAssessments RiskAssessment[]
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(uuid()) @db.Uuid
+  fullName  String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Transaction {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+
+  amount    Decimal  @db.Decimal(15,2)
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+
+  riskAssessment RiskAssessment?
+
+  @@map("transactions")
+}
+
+model RiskAssessment {
+  id            String   @id @default(uuid()) @db.Uuid
+  transactionId String   @unique @db.Uuid
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  userId    String @db.Uuid
+  user      User   @relation(fields: [userId], references: [id])
+
+  riskLevel String
+  decidedAt DateTime @default(now())
+
+  @@map("risk_assessments")
+}

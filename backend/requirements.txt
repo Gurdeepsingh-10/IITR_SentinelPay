@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-dotenv
+prisma
+pydantic
+pydantic-settings
+passlib==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]
+pydantic[email]
+email_validator
